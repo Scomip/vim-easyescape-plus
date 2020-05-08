@@ -9,37 +9,21 @@ if &cp || exists("g:loaded_easyescape")
     finish
 endif
 let g:loaded_easyescape = 1
-let s:haspy3 = has("python3")
 
 if !exists("g:easyescape_string")
     let g:easyescape_string = "kj"
 endif
 
 if !exists("g:easyescape_timeout")
-    if s:haspy3
-        let g:easyescape_timeout = 100
-    else
-        let g:easyescape_timeout = 2000
-    endif
-endif
-
-if !s:haspy3 && g:easyescape_timeout < 2000
     let g:easyescape_timeout = 2000
 endif
 
 function! s:EasyescapeSetTimer()
-    if s:haspy3
-        py3 easyescape_time = default_timer()
-    endif
-    let s:localtime = localtime()
+    let s:localtime = reltime()
 endfunction
 
 function! s:EasyescapeReadTimer()
-    if s:haspy3
-        py3 vim.command("let pyresult = %g" % (1000 * (default_timer() - easyescape_time)))
-        return pyresult
-    endif
-    return 1000 * (localtime() - s:localtime)
+    return 1000 * reltimefloat(reltime(s:localtime))
 endfunction
 
 
@@ -104,11 +88,4 @@ augroup easyescape_plus
     au InsertEnter * call s:EasyescapeInsertEnter()
 augroup END
 
-if s:haspy3
-    py3 from timeit import default_timer
-    py3 import vim
-    call s:EasyescapeSetTimer()
-else
-    let s:localtime = localtime()
-endif
-
+let s:localtime = reltime()
